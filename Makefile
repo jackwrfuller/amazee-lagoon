@@ -203,7 +203,8 @@ services :=	api \
 			keycloak-db \
 			logs2notifications \
 			webhook-handler \
-			webhooks2tasks
+			webhooks2tasks \
+			oauth2-proxy
 
 service-images += $(services)
 
@@ -456,8 +457,8 @@ STERN_VERSION = v2.6.1
 CHART_TESTING_VERSION = v3.11.0
 K3D_IMAGE = docker.io/rancher/k3s:v1.31.1-k3s1
 TESTS = [nginx,api,features-kubernetes,bulk-deployment,features-kubernetes-2,features-variables,active-standby-kubernetes,tasks,drush,python,gitlab,github,bitbucket,services]
-CHARTS_TREEISH = main
-CHARTS_REPOSITORY = https://github.com/uselagoon/lagoon-charts.git
+CHARTS_TREEISH = o2p
+CHARTS_REPOSITORY = https://github.com/jackwrfuller/lagoon-charts.git
 #CHARTS_REPOSITORY = ../lagoon-charts
 TASK_IMAGES = task-activestandby
 
@@ -710,7 +711,7 @@ go/test: local-dev/go
 		&& cd ../..; \
 	done
 
-K3D_SERVICES = api api-db api-redis auth-server backup-handler actions-handler broker api-sidecar-handler keycloak keycloak-db logs2notifications webhook-handler webhooks2tasks local-api-data-watcher-pusher local-git ssh tests $(TASK_IMAGES)
+K3D_SERVICES = oauth2-proxy api api-db api-redis auth-server backup-handler actions-handler broker api-sidecar-handler keycloak keycloak-db logs2notifications webhook-handler webhooks2tasks local-api-data-watcher-pusher local-git ssh tests $(TASK_IMAGES)
 K3D_TESTS = local-api-data-watcher-pusher local-git tests
 K3D_TOOLS = k3d helm kubectl jq stern
 
@@ -718,7 +719,7 @@ K3D_TOOLS = k3d helm kubectl jq stern
 .PHONY: k3d/test
 k3d/test: k3d/setup k3d/install-lagoon k3d/retest
 
-LOCAL_DEV_SERVICES = api auth-server actions-handler api-sidecar-handler logs2notifications webhook-handler webhooks2tasks
+LOCAL_DEV_SERVICES = oauth2-proxy api auth-server actions-handler api-sidecar-handler logs2notifications webhook-handler webhooks2tasks
 
 # install lagoon dependencies in a k3d cluster
 .PHONY: k3d/setup

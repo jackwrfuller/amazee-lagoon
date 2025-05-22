@@ -4,6 +4,10 @@ volumes:
   broker: {}
 
 services:
+  oauth2-proxy:
+    image: ${IMAGE_REPO:-lagoon}/oauth2-proxy:${IMAGE_REPO_OAUTH2_PROXY_TAG:-${IMAGE_REPO_TAG:-latest}}
+    ports:
+      - '4180:4180'
   api-db:
     image: ${IMAGE_REPO:-lagoon}/api-db:${IMAGE_REPO_API_DB_TAG:-${IMAGE_REPO_TAG:-latest}}
     ports:

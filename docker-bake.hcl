@@ -53,6 +53,7 @@ target "default"{
 
 group "default" {
   targets = [
+    "oauth2-proxy",
     "actions-handler",
     "api-db",
     "api-redis",
@@ -131,6 +132,7 @@ group "local-dev" {
 
 group "prod-images" {
   targets = [
+    "oauth2-proxy",
     "actions-handler",
     "api-db",
     "api-redis",
@@ -154,6 +156,16 @@ target "yarn-workspace-builder" {
   inherits = ["default"]
   context = "."
   dockerfile = "yarn-workspace-builder/Dockerfile"
+}
+
+target "oauth2-proxy" {
+  inherits = ["default"]
+  context = "services/oauth2-proxy"
+  dockerfile = "Dockerfile"
+  labels = {
+    "org.opencontainers.image.title": "lagoon-core/oauth2-proxy - the MariaDB database service for Lagoon API"
+  }
+  tags = ["${IMAGE_REPO}/oauth2-proxy:${TAG}"]
 }
 
 target "api" {
