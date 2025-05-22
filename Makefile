@@ -209,7 +209,8 @@ services :=	api \
 			keycloak-db \
 			logs2notifications \
 			webhook-handler \
-			webhooks2tasks
+			webhooks2tasks \
+			oauth2-proxy
 
 service-images += $(services)
 
@@ -233,6 +234,7 @@ build/api-sidecar-handler: services/api-sidecar-handler/Dockerfile
 build/keycloak-db: services/keycloak-db/$(DATABASE_DOCKERFILE)
 build/keycloak: services/keycloak/Dockerfile
 build/logs2notifications: services/logs2notifications/Dockerfile
+build/oauth2-proxy: services/oauth2-proxy/Dockerfile
 build/tests: tests/Dockerfile
 # Auth SSH needs the context of the root folder, so we have it individually
 build/ssh: services/ssh/Dockerfile
@@ -745,7 +747,7 @@ go/test: local-dev/go
 		&& cd ../..; \
 	done
 
-K3D_SERVICES = api api-db api-redis auth-server backup-handler actions-handler broker api-sidecar-handler keycloak keycloak-db logs2notifications webhook-handler webhooks2tasks local-api-data-watcher-pusher local-git ssh tests $(TASK_IMAGES)
+K3D_SERVICES = oauth2-proxy api api-db api-redis auth-server backup-handler actions-handler broker api-sidecar-handler keycloak keycloak-db logs2notifications webhook-handler webhooks2tasks local-api-data-watcher-pusher local-git ssh tests $(TASK_IMAGES)
 K3D_TESTS = local-api-data-watcher-pusher local-git tests
 K3D_TOOLS = k3d helm kubectl jq stern
 
@@ -753,7 +755,7 @@ K3D_TOOLS = k3d helm kubectl jq stern
 .PHONY: k3d/test
 k3d/test: k3d/setup k3d/install-lagoon k3d/retest
 
-LOCAL_DEV_SERVICES = api auth-server actions-handler api-sidecar-handler logs2notifications webhook-handler webhooks2tasks
+LOCAL_DEV_SERVICES = oauth2-proxy api auth-server actions-handler api-sidecar-handler logs2notifications webhook-handler webhooks2tasks
 
 # install lagoon dependencies in a k3d cluster
 .PHONY: k3d/setup
@@ -833,6 +835,7 @@ endif
 		USE_CALICO_CNI=false \
 		LAGOON_SSH_PORTAL_LOADBALANCER=$(LAGOON_SSH_PORTAL_LOADBALANCER) \
 		LAGOON_FEATURE_FLAG_DEFAULT_ROOTLESS_WORKLOAD=enabled \
+		LAGOON_FEATURE_FLAG_OAUTH2PROXY_DOMAIN="http://lagoon-oauth2proxy.$$($(KUBECTL) -n ingress-nginx get services ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}').nip.io"
 		$$([ $(LAGOON_SEED_USERNAME) ] && echo 'LAGOON_SEED_USERNAME=$(LAGOON_SEED_USERNAME)') \
 		$$([ $(LAGOON_SEED_PASSWORD) ] && echo 'LAGOON_SEED_PASSWORD=$(LAGOON_SEED_PASSWORD)') \
 		$$([ $(LAGOON_SEED_ORGANIZATION) ] && echo 'LAGOON_SEED_ORGANIZATION=$(LAGOON_SEED_ORGANIZATION)') \

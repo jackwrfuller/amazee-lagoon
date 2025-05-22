@@ -29,6 +29,9 @@ function sync_client_secrets {
   SERVICE_API_CLIENT_ID=$(/opt/keycloak/bin/kcadm.sh get -r ${KEYCLOAK_REALM:-master} clients?clientId=service-api --config $CONFIG_PATH | jq -r '.[0]["id"]')
   /opt/keycloak/bin/kcadm.sh update clients/$SERVICE_API_CLIENT_ID -s secret=$KEYCLOAK_SERVICE_API_CLIENT_SECRET --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master}
 
+  LAGOON_O2P_CLIENT_ID=$(/opt/keycloak/bin/kcadm.sh get -r ${KEYCLOAK_REALM:-master} clients?clientId=lagoon-oauth2proxy --config $CONFIG_PATH | jq -r '.[0]["id"]')
+  /opt/keycloak/bin/kcadm.sh update clients/$LAGOON_O2P_CLIENT_ID -s secret=$KEYCLOAK_LAGOON_O2P_CLIENT_SECRET --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master}
+
   LAGOON_UI_OIDC_CLIENT_ID=$(/opt/keycloak/bin/kcadm.sh get -r ${KEYCLOAK_REALM:-master} clients?clientId=lagoon-ui-oidc --config $CONFIG_PATH | jq -r '.[0]["id"]')
   /opt/keycloak/bin/kcadm.sh update clients/$LAGOON_UI_OIDC_CLIENT_ID -s secret=$KEYCLOAK_LAGOON_UI_OIDC_CLIENT_SECRET --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master}
 
@@ -677,6 +680,32 @@ function add_lagoon-cli_client {
     echo '{"protocol":"openid-connect","config":{"id.token.claim":"true","access.token.claim":"true","userinfo.token.claim":"true","user.attribute":"lagoon-uid","claim.name":"lagoon.user_id","jsonType.label":"int","multivalued":""},"name":"Lagoon User ID","protocolMapper":"oidc-usermodel-attribute-mapper"}' | /opt/keycloak/bin/kcadm.sh create -r ${KEYCLOAK_REALM:-master} clients/$CLIENT_ID/protocol-mappers/models --config $CONFIG_PATH -f -
 }
 
+function add_lagoon-oauth2proxy_client {
+    local lagoon_oauth2proxy_client=$( /opt/keycloak/bin/kcadm.sh get -r lagoon clients?clientId=lagoon-oauth2proxy --config $CONFIG_PATH | jq -r '.[0]["id"] // false')
+    if [ "$lagoon_oauth2proxy_client" != "false" ]; then
+        echo "lagoon-oauth2proxy already exists"
+        return 0
+    fi
+
+    local REDIRECT_URI="${OAUTH2_PROXY_FRONTEND_URL}/*"
+    local CLIENT_SECRET="${KEYCLOAK_LAGOON_O2P_CLIENT_SECRET}"
+    echo "Creating client lagoon-oauth2proxy with redirect URI: $REDIRECT_URI"
+    echo '{
+            "clientId": "lagoon-oauth2proxy",
+            "secret": "'"$CLIENT_SECRET"'",
+            "publicClient": false,
+            "serviceAccountsEnabled": false,
+            "standardFlowEnabled": true,
+            "directAccessGrantsEnabled": true,
+            "redirectUris": ["'"$REDIRECT_URI"'"],
+            "webOrigins": ["*"]
+        }' | /opt/keycloak/bin/kcadm.sh create clients --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master} -f -
+
+    echo "Creating mapper for lagoon-oauth2proxy"
+    CLIENT_ID=$(/opt/keycloak/bin/kcadm.sh get  -r lagoon clients?clientId=lagoon-oauth2proxy --config $CONFIG_PATH | jq -r '.[0]["id"]')
+    echo '{"protocol":"openid-connect","config":{"id.token.claim":"true","access.token.claim":"true","userinfo.token.claim":"true","user.attribute":"lagoon-uid","claim.name":"lagoon.user_id","jsonType.label":"int","multivalued":""},"name":"Lagoon User ID","protocolMapper":"oidc-usermodel-attribute-mapper"}' | /opt/keycloak/bin/kcadm.sh create -r ${KEYCLOAK_REALM:-master} clients/$CLIENT_ID/protocol-mappers/models --config $CONFIG_PATH -f -
+}
+
 function add_lagoon-ui-oidc_client {
     local lagoon_ui_oidc_client=$( /opt/keycloak/bin/kcadm.sh get -r lagoon clients?clientId=lagoon-ui-oidc --config $CONFIG_PATH | jq -r '.[0]["id"] // false')
     if [ "$lagoon_ui_oidc_client" != "false" ]; then
@@ -1016,6 +1045,7 @@ function configure_keycloak {
     add_update_platform_viewer_permissions
     service-api_add_view-users_permission
     add_lagoon-cli_client
+    add_lagoon-oauth2proxy_client
     add_lagoon-ui-oidc_client
     add_update_platform_organization_permissions
     lagoon-opensearch-sync_add_view-users_permission
