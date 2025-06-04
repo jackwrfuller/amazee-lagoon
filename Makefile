@@ -228,6 +228,7 @@ build/api-sidecar-handler: services/api-sidecar-handler/Dockerfile
 build/keycloak-db: services/keycloak-db/$(DATABASE_DOCKERFILE)
 build/keycloak: services/keycloak/Dockerfile
 build/logs2notifications: services/logs2notifications/Dockerfile
+build/oauth2-proxy: services/oauth2-proxy/Dockerfile
 build/tests: tests/Dockerfile
 # Auth SSH needs the context of the root folder, so we have it individually
 build/ssh: services/ssh/Dockerfile
