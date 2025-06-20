@@ -163,7 +163,7 @@ target "oauth2-proxy" {
   context = "services/oauth2-proxy"
   dockerfile = "Dockerfile"
   labels = {
-    "org.opencontainers.image.title": "lagoon-core/oauth2-proxy - the MariaDB database service for Lagoon API"
+    "org.opencontainers.image.title": "lagoon-core/oauth2-proxy - the OAuth2-Proxy service for Lagoon Core"
   }
   tags = ["${IMAGE_REPO}/oauth2-proxy:${TAG}"]
 }

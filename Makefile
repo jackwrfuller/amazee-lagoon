@@ -458,8 +458,8 @@ STERN_VERSION = v2.6.1
 CHART_TESTING_VERSION = v3.11.0
 K3D_IMAGE = docker.io/rancher/k3s:v1.31.1-k3s1
 TESTS = [nginx,api,features-kubernetes,bulk-deployment,features-kubernetes-2,features-variables,active-standby-kubernetes,tasks,drush,python,gitlab,github,bitbucket,services]
-CHARTS_TREEISH = o2p
-CHARTS_REPOSITORY = https://github.com/jackwrfuller/lagoon-charts.git
+CHARTS_TREEISH = main
+CHARTS_REPOSITORY = https://github.com/uselagoon/lagoon-charts.git
 #CHARTS_REPOSITORY = ../lagoon-charts
 TASK_IMAGES = task-activestandby
 
@@ -502,7 +502,7 @@ BUILD_DEPLOY_CONTROLLER_K8UP_VERSION = v2
 INSTALL_MARIADB_PROVIDER =
 INSTALL_POSTGRES_PROVIDER =
 INSTALL_MONGODB_PROVIDER =
-INSTALL_DBAAS_PROVIDERS = true
+INSTALL_DBAAS_PROVIDERS =
 ifeq ($(INSTALL_DBAAS_PROVIDERS), false)
 	INSTALL_MARIADB_PROVIDER = false
 	INSTALL_POSTGRES_PROVIDER = false
@@ -797,7 +797,7 @@ endif
 		USE_CALICO_CNI=false \
 		LAGOON_SSH_PORTAL_LOADBALANCER=$(LAGOON_SSH_PORTAL_LOADBALANCER) \
 		LAGOON_FEATURE_FLAG_DEFAULT_ROOTLESS_WORKLOAD=enabled \
-		LAGOON_FEATURE_FLAG_OAUTH2PROXY_DOMAIN="http://lagoon-oauth2proxy.$$($(KUBECTL) -n ingress-nginx get services ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}').nip.io"
+		LAGOON_FEATURE_FLAG_OAUTH2PROXY_DOMAIN="https://lagoon-oauth2proxy.$$($(KUBECTL) -n ingress-nginx get services ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}').nip.io" \
 		$$([ $(INSTALL_STABLE_CORE) ] && echo 'INSTALL_STABLE_CORE=$(INSTALL_STABLE_CORE)') \
 		$$([ $(INSTALL_STABLE_REMOTE) ] && echo 'INSTALL_STABLE_REMOTE=$(INSTALL_STABLE_REMOTE)') \
 		$$([ $(INSTALL_STABLE_BUILDDEPLOY) ] && echo 'INSTALL_STABLE_BUILDDEPLOY=$(INSTALL_STABLE_BUILDDEPLOY)') \
