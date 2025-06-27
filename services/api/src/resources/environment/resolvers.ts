@@ -750,6 +750,14 @@ export const updateEnvironment: ResolverFn = async (
     })
   );
 
+  if (typeof input.patch.routes ==='string' && input.patch.routes.trim() !== '') {
+      const routeList = input.patch.routes.split(',').map(r => r.trim()).filter(Boolean);
+      const sqlStatements = Sql.updateRoutesForEnvironment({ environmentId: id, routes: routeList });
+      for (const statement of sqlStatements) {
+        await query(sqlClientPool, statement);
+      }
+  }
+
   const rows = await query(sqlClientPool, Sql.selectEnvironmentById(id));
   const withK8s = Helpers(sqlClientPool).aliasOpenshiftToK8s(rows);
 

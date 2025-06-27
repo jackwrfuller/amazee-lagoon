@@ -892,6 +892,12 @@ const typeDefs = gql`
     kubernetesNamespacePattern: String @deprecated(reason: "No longer in use")
   }
 
+  type Route {
+      id: Int
+      route: String
+      environment: Environment
+  }
+
   type EnvironmentHitsMonth {
     total: Int
   }

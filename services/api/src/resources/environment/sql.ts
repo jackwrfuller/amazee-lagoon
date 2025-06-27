@@ -12,6 +12,19 @@ export const Sql = {
       .update(updatePatch)
       .toString();
   },
+  updateRoutesForEnvironment: ({ environmentId, routes }: { environmentId: number, routes: string[] }) => {
+    const deleteSql = knex('routes')
+                        .where('environment_id', '=', environmentId)
+                        .del()
+                        .toString();
+
+    const insertSqls = routes.map(route => knex('routes')
+                                             .insert({ environment_id: environmentId, route})
+                                             .toString()
+                                 );
+
+    return [deleteSql, ...insertSqls]; 
+  },
   selectEnvironmentById: (id: number) =>
     knex('environment')
       .where('id', '=', id)
