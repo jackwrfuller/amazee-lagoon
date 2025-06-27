@@ -29,6 +29,12 @@ export const Sql = {
     knex('environment')
       .where('id', '=', id)
       .toString(),
+  selectEnvironmentByRoute: (route: string) =>
+    knex('environment')
+      .join('routes', 'environment.id', 'routes.environment_id')
+      .where('routes.route', route)
+      .select('environment.*')
+      .toString(),
   selectEnvironmentByNameAndProject: (name: string, projectId: number) =>
     knex('environment')
       .where('name', '=', name)
