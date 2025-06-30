@@ -106,6 +106,7 @@ const {
   addOrUpdateEnvironmentStorage,
   getEnvironmentByName,
   getEnvironmentById,
+  getEnvironmentByRoute,
   getEnvironmentByOpenshiftProjectName,
   getEnvironmentByKubernetesNamespaceName,
   getEnvironmentHoursMonthByEnvironmentId,
@@ -311,6 +312,7 @@ const resolvers = {
     TASK: 'task',
     USER: 'user',
     VARIABLE: 'variable',
+    FILE: 'file',
   },
   AuditSource: {
     API: 'api',
@@ -568,6 +570,7 @@ const resolvers = {
     problemSources: getProblemSources,
     environmentByName: getEnvironmentByName,
     environmentById: getEnvironmentById,
+    environmentByRoute: getEnvironmentByRoute,
     environmentByOpenshiftProjectName: getEnvironmentByOpenshiftProjectName,
     environmentByKubernetesNamespaceName: getEnvironmentByKubernetesNamespaceName,
     environmentsByFactSearch: getEnvironmentsByFactSearch,

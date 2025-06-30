@@ -892,6 +892,12 @@ const typeDefs = gql`
     kubernetesNamespacePattern: String @deprecated(reason: "No longer in use")
   }
 
+  type Route {
+      id: Int
+      route: String
+      environment: Environment
+  }
+
   type EnvironmentHitsMonth {
     total: Int
   }
@@ -1208,6 +1214,7 @@ const typeDefs = gql`
     TASK
     USER
     VARIABLE
+    FILE
   }
 
   input AuditLogInput {
@@ -1359,6 +1366,7 @@ const typeDefs = gql`
     projectByGitUrl(gitUrl: String!): Project
     environmentByName(name: String!, project: Int!, includeDeleted: Boolean): Environment
     environmentById(id: Int!): Environment
+    environmentByRoute(route: String!): Environment
     """
     Returns Environment Object by a given openshiftProjectName
     """

@@ -65,6 +65,27 @@ export const getEnvironmentById = async (
   return environment;
 };
 
+export const getEnvironmentByRoute = async (
+  root,
+  args,
+  { sqlClientPool, hasPermission, adminScopes }
+) => {
+  const rows = await query(sqlClientPool, Sql.selectEnvironmentByRoute(args.route));
+  const environment = rows?.[0] ?? null;
+
+  if (!environment) {
+    return null;
+  }
+  // if the user is not a platform owner or viewer, then perform normal permission check
+  if (!adminScopes.platformOwner && !adminScopes.platformViewer) {
+    await hasPermission('environment', 'view', {
+      project: environment.project
+    });
+  }
+
+  return environment;
+};
+
 export const getEnvironmentsByProjectId: ResolverFn = async (
   project,
   args,
@@ -749,6 +770,14 @@ export const updateEnvironment: ResolverFn = async (
       }
     })
   );
+
+  if (typeof input.patch.routes ==='string' && input.patch.routes.trim() !== '') {
+      const routeList = input.patch.routes.split(',').map(r => r.trim()).filter(Boolean);
+      const sqlStatements = Sql.updateRoutesForEnvironment({ environmentId: id, routes: routeList });
+      for (const statement of sqlStatements) {
+        await query(sqlClientPool, statement);
+      }
+  }
 
   const rows = await query(sqlClientPool, Sql.selectEnvironmentById(id));
   const withK8s = Helpers(sqlClientPool).aliasOpenshiftToK8s(rows);
