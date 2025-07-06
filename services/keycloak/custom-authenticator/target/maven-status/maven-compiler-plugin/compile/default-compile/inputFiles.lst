@@ -1,0 +1,11 @@
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/LagoonAuthenticator.java
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/LagoonAuthenticatorFactory.java
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/SecretQuestionAuthenticator.java
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/SecretQuestionAuthenticatorFactory.java
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/SecretQuestionCredentialProvider.java
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/SecretQuestionCredentialProviderFactory.java
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/SecretQuestionRequiredAction.java
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/SecretQuestionRequiredActionFactory.java
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/credential/SecretQuestionCredentialModel.java
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/credential/dto/SecretQuestionCredentialData.java
+/Users/jackfuller/amazee/lagoon/services/keycloak/custom-authenticator/src/main/java/org/keycloak/examples/authenticator/credential/dto/SecretQuestionSecretData.java
