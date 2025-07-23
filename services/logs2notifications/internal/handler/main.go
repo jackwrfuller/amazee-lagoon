@@ -44,35 +44,36 @@ type Action struct {
 
 // Messaging is used for the config and client information for the messaging queue.
 type Messaging struct {
-	Config                  mq.Config
-	LagoonAPI               LagoonAPI
-	ConnectionAttempts      int
-	ConnectionRetryInterval int
-	EnableDebug             bool
-	LagoonAppID             string
-	DisableSlack            bool
-	DisableRocketChat       bool
-	DisableMicrosoftTeams   bool
-	DisableEmail            bool
-	DisableUserActionEmail  bool
-	DisableWebhooks         bool
-	DisableS3               bool
-	EmailSender             string
-	EmailUsername           string
-	EmailSenderPassword     string
-	EmailHost               string
-	EmailPort               string
-	EmailSSL                bool
-	EmailDeliveryFunction   DeliverEmailType
-	EmailInsecureSkipVerify bool
-	EmailBase64Logo         string
-	EmailTemplate           string
-	S3FilesAccessKeyID      string
-	S3FilesSecretAccessKey  string
-	S3FilesBucket           string
-	S3FilesRegion           string
-	S3FilesOrigin           string
-	S3IsGCS                 bool
+	Config                    mq.Config
+	LagoonAPI                 LagoonAPI
+	ConnectionAttempts        int
+	ConnectionRetryInterval   int
+	EnableDebug               bool
+	LagoonAppID               string
+	DisableSlack              bool
+	DisableRocketChat         bool
+	DisableMicrosoftTeams     bool
+	DisableEmail              bool
+	DisableUserActionEmail    bool
+	DisableWebhooks           bool
+	FinegrainedNotifications  bool
+	DisableS3                 bool
+	EmailSender               string
+	EmailUsername             string
+	EmailSenderPassword       string
+	EmailHost                 string
+	EmailPort                 string
+	EmailSSL                  bool
+	EmailDeliveryFunction     DeliverEmailType
+	EmailInsecureSkipVerify   bool
+	EmailBase64Logo           string
+	EmailTemplate             string
+	S3FilesAccessKeyID        string
+	S3FilesSecretAccessKey    string
+	S3FilesBucket             string
+	S3FilesRegion             string
+	S3FilesOrigin             string
+	S3IsGCS                   bool
 }
 
 // Notification .
@@ -155,40 +156,41 @@ func NewMessaging(config mq.Config,
 	startupInterval int,
 	enableDebug bool,
 	appID string,
-	disableSlack, disableRocketChat, disableMicrosoftTeams, disableEmail, disableUserActionEmail, disableWebhooks, disableS3 bool,
+	disableSlack, disableRocketChat, disableMicrosoftTeams, disableEmail, disableUserActionEmail, disableWebhooks, finegrainedWebhooks, disableS3 bool,
 	emailSender, emailusername, emailSenderPassword, emailHost, emailPort string, emailSSL, emailInsecureSkipVerify bool,
 	emailBase64Logo string, emailTemplate string,
 	s3FilesAccessKeyID, s3FilesSecretAccessKey, s3FilesBucket, s3FilesRegion, s3FilesOrigin string, s3isGCS bool) *Messaging {
 	return &Messaging{
-		Config:                  config,
-		LagoonAPI:               lagoonAPI,
-		ConnectionAttempts:      startupAttempts,
-		ConnectionRetryInterval: startupInterval,
-		EnableDebug:             enableDebug,
-		LagoonAppID:             appID,
-		DisableSlack:            disableSlack,
-		DisableRocketChat:       disableRocketChat,
-		DisableMicrosoftTeams:   disableMicrosoftTeams,
-		DisableEmail:            disableEmail,
-		DisableUserActionEmail:  disableUserActionEmail,
-		DisableWebhooks:         disableWebhooks,
-		DisableS3:               disableS3,
-		EmailSender:             emailSender,
-		EmailUsername:           emailusername,
-		EmailSenderPassword:     emailSenderPassword,
-		EmailHost:               emailHost,
-		EmailPort:               emailPort,
-		EmailSSL:                emailSSL,
-		EmailInsecureSkipVerify: emailInsecureSkipVerify,
-		EmailBase64Logo:         emailBase64Logo,
-		EmailTemplate:           emailTemplate,
-		EmailDeliveryFunction:   deliverEmailDefault,
-		S3FilesAccessKeyID:      s3FilesAccessKeyID,
-		S3FilesSecretAccessKey:  s3FilesSecretAccessKey,
-		S3FilesBucket:           s3FilesBucket,
-		S3FilesRegion:           s3FilesRegion,
-		S3FilesOrigin:           s3FilesOrigin,
-		S3IsGCS:                 s3isGCS,
+		Config:                    config,
+		LagoonAPI:                 lagoonAPI,
+		ConnectionAttempts:        startupAttempts,
+		ConnectionRetryInterval:   startupInterval,
+		EnableDebug:               enableDebug,
+		LagoonAppID:               appID,
+		DisableSlack:              disableSlack,
+		DisableRocketChat:         disableRocketChat,
+		DisableMicrosoftTeams:     disableMicrosoftTeams,
+		DisableEmail:              disableEmail,
+		DisableUserActionEmail:    disableUserActionEmail,
+		DisableWebhooks:           disableWebhooks,
+		FinegrainedNotifications:  finegrainedWebhooks,
+		DisableS3:                 disableS3,
+		EmailSender:               emailSender,
+		EmailUsername:             emailusername,
+		EmailSenderPassword:       emailSenderPassword,
+		EmailHost:                 emailHost,
+		EmailPort:                 emailPort,
+		EmailSSL:                  emailSSL,
+		EmailInsecureSkipVerify:   emailInsecureSkipVerify,
+		EmailBase64Logo:           emailBase64Logo,
+		EmailTemplate:             emailTemplate,
+		EmailDeliveryFunction:     deliverEmailDefault,
+		S3FilesAccessKeyID:        s3FilesAccessKeyID,
+		S3FilesSecretAccessKey:    s3FilesSecretAccessKey,
+		S3FilesBucket:             s3FilesBucket,
+		S3FilesRegion:             s3FilesRegion,
+		S3FilesOrigin:             s3FilesOrigin,
+		S3IsGCS:                   s3isGCS,
 	}
 }
 
@@ -290,7 +292,7 @@ func (h *Messaging) processMessage(message []byte) {
 				}
 				if len(projectNotifications.Notifications.Webhook) > 0 && !h.DisableWebhooks {
 					for _, hook := range projectNotifications.Notifications.Webhook {
-						h.SendToWebhook(notification, hook)
+						h.SendToWebhook(notification, hook, h.FinegrainedNotifications)
 					}
 				}
 			}

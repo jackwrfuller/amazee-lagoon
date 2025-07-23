@@ -37,14 +37,15 @@ var (
 	s3FilesOrigin          string
 	s3isGCS                bool
 
-	disableSlack           bool
-	disableRocketChat      bool
-	disableMicrosoftTeams  bool
-	disableEmail           bool
-	disableUserActionEmail bool
-	disableWebhooks        bool
-	disableS3              bool
-	enableDebug            bool
+	disableSlack              bool
+	disableRocketChat         bool
+	disableMicrosoftTeams     bool
+	disableEmail              bool
+	disableUserActionEmail    bool
+	disableWebhooks           bool
+	disableS3                 bool
+	enableDebug               bool
+	finegrainedNotifications  bool
 
 	emailSender             string
 	emailUsername           string
@@ -99,6 +100,8 @@ func main() {
 		"Disable the logs2microsoftteams feature.")
 	flag.BoolVar(&disableWebhooks, "disable-webhooks", false,
 		"Disable the logs2webhooks feature.")
+	flag.BoolVar(&finegrainedNotifications, "finegrained-notifications", false,
+		"Enable finegrained webhook notifications.")
 
 	// S3 configuration
 	flag.BoolVar(&disableS3, "disable-s3", false,
@@ -298,6 +301,7 @@ func main() {
 		disableEmail,
 		disableUserActionEmail,
 		disableWebhooks,
+		finegrainedNotifications,
 		disableS3,
 		emailSender,
 		emailUsername,

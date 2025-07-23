@@ -27,8 +27,8 @@ type WebhookData struct {
 }
 
 // SendToWebhook .
-func (h *Messaging) SendToWebhook(notification *Notification, webhook schema.AddNotificationWebhookInput) {
-	message, err := h.processWebhookTemplate(notification)
+func (h *Messaging) SendToWebhook(notification *Notification, webhook schema.AddNotificationWebhookInput, finegrained bool) {
+	message, err := h.processWebhookTemplate(notification, finegrained)
 	if err != nil {
 		return
 	}
@@ -56,7 +56,7 @@ func (h *Messaging) sendWebhookMessage(project string, data WebhookData, webhook
 }
 
 // processWebhookTemplate .
-func (h *Messaging) processWebhookTemplate(notification *Notification) (*WebhookData, error) {
+func (h *Messaging) processWebhookTemplate(notification *Notification, finegrained bool) (*WebhookData, error) {
 	tpl, err := getWebhookEvent(notification.Event)
 	if err != nil {
 		eventSplit := strings.Split(notification.Event, ":")
@@ -75,10 +75,20 @@ func (h *Messaging) processWebhookTemplate(notification *Notification) (*Webhook
 		Route:       notification.Meta.Route,
 		Routes:      notification.Meta.Routes,
 		LogLink:     notification.Meta.LogLink,
+		BuildStep:   notification.Meta.BuildStep,
 	}
 
 	switch tpl {
 	case "deployFinished":
+		match, _ := regexp.MatchString(".*WithWarnings$", notification.Meta.BuildStep)
+		if match {
+			data.Warnings = true
+		}
+		data.Type = "DEPLOYMENT"
+	case "deployRunning":
+		if !finegrained {
+			return nil, fmt.Errorf("not including event as finegrained is disabled")
+		}
 		match, _ := regexp.MatchString(".*WithWarnings$", notification.Meta.BuildStep)
 		if match {
 			data.Warnings = true
@@ -149,4 +159,6 @@ var webhookEventTypeMap = map[string]EventMap{
 	"github:push:CannotDeleteProductionEnvironment":                {Emoji: warningEmoji, Color: "warning", Template: "notDeleted"},
 	"bitbucket:repo:push:CannotDeleteProductionEnvironment":        {Emoji: warningEmoji, Color: "warning", Template: "notDeleted"},
 	"gitlab:push:CannotDeleteProductionEnvironment":                {Emoji: warningEmoji, Color: "warning", Template: "notDeleted"},
+
+	"task:builddeploy-kubernetes:running": {Emoji: infoEmoji, Color: "#E8E8E8", Template: "deployRunning"},
 }
