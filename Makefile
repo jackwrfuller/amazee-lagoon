@@ -965,7 +965,7 @@ k3d/get-lagoon-details:
 	echo "SSH Portal Service: lagoon-ssh-portal.$$($(KUBECTL) -n lagoon get services lagoon-remote-ssh-portal -o jsonpath='{.status.loadBalancer.ingress[0].ip}').nip.io:$$($(KUBECTL) -n lagoon get services lagoon-remote-ssh-portal -o jsonpath='{.spec.ports[0].port}')"; \
 	echo "SSH Token Service: lagoon-token.$$($(KUBECTL) -n lagoon-core get services lagoon-core-ssh-token -o jsonpath='{.status.loadBalancer.ingress[0].ip}').nip.io:$$($(KUBECTL) -n lagoon-core get services lagoon-core-ssh-token -o jsonpath='{.spec.ports[0].port}')"; \
 	echo "Keycloak admin URL: $$( [ $(LAGOON_CORE_USE_HTTPS) = true ] && echo https || echo http )://lagoon-keycloak.$$IP.nip.io/auth"; \
-	echo "Keycloak admin password: $$( $(KUBECTL) get secret -n lagoon-core lagoon-core-keycloak -o jsonpath='{.data.KEYCLOAK_ADMIN_PASSWORD}' | base64 --decode )"; \
+	echo "Keycloak admin password: $$( $(KUBECTL) get secret -n lagoon-core lagoon-core-keycloak -o json | $(JQ) -r '.data.KEYCLOAK_ADMIN_PASSWORD | @base64d')"; \
 	echo "MailPit (email catching service): http://mailpit.$$IP.nip.io"; \
 	echo ""
 
