@@ -465,8 +465,8 @@ STERN_VERSION = v2.6.1
 CHART_TESTING_VERSION = v3.11.0
 K3D_IMAGE = docker.io/rancher/k3s:v1.31.1-k3s1
 TESTS = [nginx,api,features-kubernetes,bulk-deployment,features-kubernetes-2,features-variables,active-standby-kubernetes,tasks,drush,python,gitlab,github,bitbucket,services]
-CHARTS_TREEISH = main
-CHARTS_REPOSITORY = https://github.com/uselagoon/lagoon-charts.git
+CHARTS_TREEISH = o2p-no-sidecar
+CHARTS_REPOSITORY = https://github.com/jackwrfuller/lagoon-charts.git
 #CHARTS_REPOSITORY = ../lagoon-charts
 TASK_IMAGES = task-activestandby
 
@@ -835,7 +835,7 @@ endif
 		USE_CALICO_CNI=false \
 		LAGOON_SSH_PORTAL_LOADBALANCER=$(LAGOON_SSH_PORTAL_LOADBALANCER) \
 		LAGOON_FEATURE_FLAG_DEFAULT_ROOTLESS_WORKLOAD=enabled \
-		LAGOON_FEATURE_FLAG_OAUTH2PROXY_DOMAIN="http://lagoon-oauth2proxy.$$($(KUBECTL) -n ingress-nginx get services ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}').nip.io"
+		LAGOON_FEATURE_FLAG_OAUTH2PROXY_DOMAIN="http://lagoon-oauth2proxy.$$($(KUBECTL) -n ingress-nginx get services ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}').nip.io" \
 		$$([ $(LAGOON_SEED_USERNAME) ] && echo 'LAGOON_SEED_USERNAME=$(LAGOON_SEED_USERNAME)') \
 		$$([ $(LAGOON_SEED_PASSWORD) ] && echo 'LAGOON_SEED_PASSWORD=$(LAGOON_SEED_PASSWORD)') \
 		$$([ $(LAGOON_SEED_ORGANIZATION) ] && echo 'LAGOON_SEED_ORGANIZATION=$(LAGOON_SEED_ORGANIZATION)') \
