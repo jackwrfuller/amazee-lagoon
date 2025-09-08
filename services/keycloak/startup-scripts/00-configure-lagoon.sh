@@ -687,9 +687,8 @@ function add_lagoon-oauth2proxy_client {
         return 0
     fi
 
-    local REDIRECT_URI="${OAUTH2_PROXY_FRONTEND_URL}/*"
     local CLIENT_SECRET="${KEYCLOAK_LAGOON_O2P_CLIENT_SECRET}"
-    echo "Creating client lagoon-oauth2proxy with redirect URI: $REDIRECT_URI"
+    echo "Creating client lagoon-oauth2proxy"
     echo '{
             "clientId": "lagoon-oauth2proxy",
             "secret": "'"$CLIENT_SECRET"'",
@@ -697,7 +696,7 @@ function add_lagoon-oauth2proxy_client {
             "serviceAccountsEnabled": false,
             "standardFlowEnabled": true,
             "directAccessGrantsEnabled": true,
-            "redirectUris": ["'"$REDIRECT_URI"'"],
+            "redirectUris": ["*"],
             "webOrigins": ["*"]
         }' | /opt/keycloak/bin/kcadm.sh create clients --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master} -f -
 
