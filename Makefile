@@ -941,6 +941,14 @@ k3d/push-local-build-image:
 		&& docker tag lagoon/build-deploy-image:local $$IMAGE_REGISTRY/build-deploy-image:$(BUILD_DEPLOY_IMAGE_TAG) \
 		&& docker push $$IMAGE_REGISTRY/build-deploy-image:$(BUILD_DEPLOY_IMAGE_TAG)
 
+.PHONY: k3d/push-local-o2p-image
+k3d/push-local-o2p-image:
+	@export KUBECONFIG="$$(pwd)/kubeconfig.k3d.$(CI_BUILD_TAG)" && \
+		export IMAGE_REGISTRY="registry.$$($(KUBECTL) -n ingress-nginx get services ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}').nip.io/library" \
+		&& docker login -u admin -p Harbor12345 $$IMAGE_REGISTRY \
+		&& docker tag quay.io/oauth2-proxy/oauth2-proxy:latest $$IMAGE_REGISTRY/oauth2-proxy:o2p-authentication \
+		&& docker push $$IMAGE_REGISTRY/oauth2-proxy:o2p-authentication
+
 # pull, retag, then push the stable version of the build image to the k3d cluster registry.
 .PHONY: k3d/push-stable-build-image
 k3d/push-stable-build-image:
