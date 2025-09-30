@@ -432,6 +432,7 @@
       "lagoon-ui": [],
       "lagoon-cli": [],
       "lagoon-ui-oidc": [],
+      "lagoon-oauth2proxy": [],
       "service-api": []
     }
   },
@@ -3406,6 +3407,33 @@
         "offline_access",
         "microprofile-jwt"
       ]
+    },
+    {
+      "clientId": "lagoon-oauth2proxy",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "protocolMappers": [
+        {
+          "name": "Lagoon User ID",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "lagoon-uid",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "lagoon.user_id",
+            "jsonType.label": "int",
+            "multivalued": ""
+          }
+        }
+      ],
     },
     {
       "clientId": "realm-management",
