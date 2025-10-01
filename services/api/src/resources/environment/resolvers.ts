@@ -909,6 +909,34 @@ export const userCanSshToEnvironment: ResolverFn = async (
   }
 };
 
+export const userCanViewEnvironmentRoute: ResolverFn = async (
+  root,
+  args,
+  { sqlClientPool, hasPermission }
+) => {
+  const openshiftProjectName =
+    args.kubernetesNamespaceName || args.openshiftProjectName;
+
+  const rows = await query(sqlClientPool, Sql.canViewEnvironmentRoute(openshiftProjectName));
+  const withK8s = Helpers(sqlClientPool).aliasOpenshiftToK8s(rows);
+  const environment = withK8s[0];
+
+  if (!environment) {
+    return null;
+  }
+
+  try {
+    await hasPermission('environment', `viewRoute:${environment.environmentType}`, {
+      project: environment.project
+    });
+
+    return environment;
+  } catch (err) {
+    return null;
+  }
+};
+
+
 // this is used to add or update a service in an environment, and the associated containers of that service
 // this extends the capabalities of the service now and allows for additional functionality for individual services
 export const addOrUpdateEnvironmentService: ResolverFn = async (

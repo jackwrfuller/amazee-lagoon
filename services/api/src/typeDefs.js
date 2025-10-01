@@ -1409,6 +1409,10 @@ const typeDefs = gql`
       openshiftProjectName: String
       kubernetesNamespaceName: String
     ): Environment
+    userCanViewEnvironmentRoute(
+      openshiftProjectName: String
+      kubernetesNamespaceName: String
+    ): Environment
     deploymentByRemoteId(id: String): Deployment
     deploymentByName(input: DeploymentByNameInput): Deployment
     deploymentsByBulkId(bulkId: String): [Deployment]

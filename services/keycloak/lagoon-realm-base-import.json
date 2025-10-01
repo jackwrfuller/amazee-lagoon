@@ -1189,6 +1189,9 @@
                 "name": "ssh:development"
               },
               {
+                "name": "viewRoute:development"
+              },
+              {
                 "name": "delete:development"
               },
               {
@@ -1202,6 +1205,9 @@
               },
               {
                 "name": "ssh:production"
+              },
+              {
+                "name": "viewRoute:production"
               },
               {
                 "name": "delete:production"
@@ -2051,6 +2057,17 @@
             }
           },
           {
+            "name": "User can view Development Environment routes",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "resources": "[\"environment\"]",
+              "scopes": "[\"viewRoute:development\"]",
+              "applyPolicies": "[\"[Lagoon] User has access to project\",\"[Lagoon] Users role for project is Developer\"]"
+            }
+          },
+          {
             "name": "Run Drush uli on Production Environment",
             "type": "scope",
             "logic": "POSITIVE",
@@ -2421,6 +2438,17 @@
             "config": {
               "resources": "[\"environment\"]",
               "scopes": "[\"ssh:production\"]",
+              "applyPolicies": "[\"[Lagoon] User has access to project\",\"[Lagoon] Users role for project is Maintainer\"]"
+            }
+          },
+          {
+            "name": "User can view Production Environment routes",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "resources": "[\"environment\"]",
+              "scopes": "[\"viewRoute:production\"]",
               "applyPolicies": "[\"[Lagoon] User has access to project\",\"[Lagoon] Users role for project is Maintainer\"]"
             }
           },
@@ -3433,7 +3461,7 @@
             "multivalued": ""
           }
         }
-      ],
+      ]
     },
     {
       "clientId": "realm-management",
