@@ -925,15 +925,9 @@ export const userCanViewEnvironmentRoute: ResolverFn = async (
     return null;
   }
 
-  try {
-    await hasPermission('environment', `viewRoute:${environment.environmentType}`, {
-      project: environment.project
-    });
-
-    return environment;
-  } catch (err) {
-    return null;
-  }
+  await hasPermission('environment', `viewRoute:${environment.environmentType}`, {
+    project: environment.project
+  });
 };
 
 
