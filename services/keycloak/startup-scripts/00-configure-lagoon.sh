@@ -29,6 +29,9 @@ function sync_client_secrets {
   SERVICE_API_CLIENT_ID=$(/opt/keycloak/bin/kcadm.sh get -r ${KEYCLOAK_REALM:-master} clients?clientId=service-api --config $CONFIG_PATH | jq -r '.[0]["id"]')
   /opt/keycloak/bin/kcadm.sh update clients/$SERVICE_API_CLIENT_ID -s secret=$KEYCLOAK_SERVICE_API_CLIENT_SECRET --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master}
 
+  LAGOON_O2P_CLIENT_ID=$(/opt/keycloak/bin/kcadm.sh get -r ${KEYCLOAK_REALM:-master} clients?clientId=lagoon-oauth2proxy --config $CONFIG_PATH | jq -r '.[0]["id"]')
+  /opt/keycloak/bin/kcadm.sh update clients/$LAGOON_O2P_CLIENT_ID -s secret=$KEYCLOAK_LAGOON_O2P_CLIENT_SECRET --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master}
+
   LAGOON_UI_OIDC_CLIENT_ID=$(/opt/keycloak/bin/kcadm.sh get -r ${KEYCLOAK_REALM:-master} clients?clientId=lagoon-ui-oidc --config $CONFIG_PATH | jq -r '.[0]["id"]')
   /opt/keycloak/bin/kcadm.sh update clients/$LAGOON_UI_OIDC_CLIENT_ID -s secret=$KEYCLOAK_LAGOON_UI_OIDC_CLIENT_SECRET --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master}
 
@@ -405,7 +408,7 @@ function remove_deleteall_permissions_scopes {
   /opt/keycloak/bin/kcadm.sh update clients/$CLIENT_ID/authz/resource-server/resource/$USER_RESOURCE_ID --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master} -s 'scopes=[{"name":"add"},{"name":"getBySshKey"},{"name":"update"},{"name":"viewAll"},{"name":"delete"}]'
 
   ENVIRONMENT_RESOURCE_ID=$(/opt/keycloak/bin/kcadm.sh get -r lagoon clients/$CLIENT_ID/authz/resource-server/resource?name=environment --config $CONFIG_PATH | jq -r '.[0]["_id"]')
-  /opt/keycloak/bin/kcadm.sh update clients/$CLIENT_ID/authz/resource-server/resource/$ENVIRONMENT_RESOURCE_ID --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master} -s 'scopes=[{"name":"deploy:production"},{"name":"addOrUpdate:production"},{"name":"viewAll"},{"name":"storage"},{"name":"addOrUpdate:development"},{"name":"update:development"},{"name":"ssh:development"},{"name":"delete:development"},{"name":"view"},{"name":"deploy:development"},{"name":"deleteNoExec"},{"name":"ssh:production"},{"name":"delete:production"},{"name":"update:production"}]'
+  /opt/keycloak/bin/kcadm.sh update clients/$CLIENT_ID/authz/resource-server/resource/$ENVIRONMENT_RESOURCE_ID --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master} -s 'scopes=[{"name":"deploy:production"},{"name":"addOrUpdate:production"},{"name":"viewAll"},{"name":"storage"},{"name":"addOrUpdate:development"},{"name":"update:development"},{"name":"ssh:development"},{"name":"viewRoute:development"},{"name":"delete:development"},{"name":"view"},{"name":"deploy:development"},{"name":"deleteNoExec"},{"name":"ssh:production"},{"name":"viewRoute:production"},{"name":"delete:production"},{"name":"update:production"}]'
 
   ORGANIZATION_RESOURCE_ID=$(/opt/keycloak/bin/kcadm.sh get -r lagoon clients/$CLIENT_ID/authz/resource-server/resource?name=organization --config $CONFIG_PATH | jq -r '.[0]["_id"]')
   /opt/keycloak/bin/kcadm.sh update clients/$CLIENT_ID/authz/resource-server/resource/$ORGANIZATION_RESOURCE_ID --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master} -s 'scopes=[{"name":"updateNotification"},{"name":"addUser"},{"name":"add"},{"name":"removeNotification"},{"name":"viewNotification"},{"name":"addOwner"},{"name":"updateOrganization"},{"name":"update"},{"name":"viewUser"},{"name":"viewAll"},{"name":"updateProject"},{"name":"delete"},{"name":"viewProject"},{"name":"addNotification"},{"name":"viewUsers"},{"name":"view"},{"name":"viewGroup"},{"name":"deleteProject"},{"name":"removeGroup"},{"name":"addViewer"},{"name":"addProject"},{"name":"addGroup"}]'
@@ -674,6 +677,31 @@ function add_lagoon-cli_client {
     echo '{"clientId": "lagoon-cli", "publicClient": true, "webOrigins": ["*"], "redirectUris": ["http://127.0.0.1"]}' | /opt/keycloak/bin/kcadm.sh create clients --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master} -f -
     echo Creating mapper for lagoon-cli "lagoon-uid"
     CLIENT_ID=$(/opt/keycloak/bin/kcadm.sh get  -r lagoon clients?clientId=lagoon-cli --config $CONFIG_PATH | jq -r '.[0]["id"]')
+    echo '{"protocol":"openid-connect","config":{"id.token.claim":"true","access.token.claim":"true","userinfo.token.claim":"true","user.attribute":"lagoon-uid","claim.name":"lagoon.user_id","jsonType.label":"int","multivalued":""},"name":"Lagoon User ID","protocolMapper":"oidc-usermodel-attribute-mapper"}' | /opt/keycloak/bin/kcadm.sh create -r ${KEYCLOAK_REALM:-master} clients/$CLIENT_ID/protocol-mappers/models --config $CONFIG_PATH -f -
+}
+
+function add_lagoon-oauth2proxy_client {
+    local lagoon_oauth2proxy_client=$( /opt/keycloak/bin/kcadm.sh get -r lagoon clients?clientId=lagoon-oauth2proxy --config $CONFIG_PATH | jq -r '.[0]["id"] // false')
+    if [ "$lagoon_oauth2proxy_client" != "false" ]; then
+        echo "lagoon-oauth2proxy already exists"
+        return 0
+    fi
+
+    local CLIENT_SECRET="${KEYCLOAK_LAGOON_O2P_CLIENT_SECRET}"
+    echo "Creating client lagoon-oauth2proxy"
+    echo '{
+            "clientId": "lagoon-oauth2proxy",
+            "secret": "'"$CLIENT_SECRET"'",
+            "publicClient": false,
+            "serviceAccountsEnabled": false,
+            "standardFlowEnabled": true,
+            "directAccessGrantsEnabled": true,
+            "redirectUris": ["*"],
+            "webOrigins": ["*"]
+        }' | /opt/keycloak/bin/kcadm.sh create clients --config $CONFIG_PATH -r ${KEYCLOAK_REALM:-master} -f -
+
+    echo "Creating mapper for lagoon-oauth2proxy"
+    CLIENT_ID=$(/opt/keycloak/bin/kcadm.sh get  -r lagoon clients?clientId=lagoon-oauth2proxy --config $CONFIG_PATH | jq -r '.[0]["id"]')
     echo '{"protocol":"openid-connect","config":{"id.token.claim":"true","access.token.claim":"true","userinfo.token.claim":"true","user.attribute":"lagoon-uid","claim.name":"lagoon.user_id","jsonType.label":"int","multivalued":""},"name":"Lagoon User ID","protocolMapper":"oidc-usermodel-attribute-mapper"}' | /opt/keycloak/bin/kcadm.sh create -r ${KEYCLOAK_REALM:-master} clients/$CLIENT_ID/protocol-mappers/models --config $CONFIG_PATH -f -
 }
 
@@ -1016,6 +1044,7 @@ function configure_keycloak {
     add_update_platform_viewer_permissions
     service-api_add_view-users_permission
     add_lagoon-cli_client
+    add_lagoon-oauth2proxy_client
     add_lagoon-ui-oidc_client
     add_update_platform_organization_permissions
     lagoon-opensearch-sync_add_view-users_permission

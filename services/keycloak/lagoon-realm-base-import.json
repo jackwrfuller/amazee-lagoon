@@ -432,6 +432,7 @@
       "lagoon-ui": [],
       "lagoon-cli": [],
       "lagoon-ui-oidc": [],
+      "lagoon-oauth2proxy": [],
       "service-api": []
     }
   },
@@ -1188,6 +1189,9 @@
                 "name": "ssh:development"
               },
               {
+                "name": "viewRoute:development"
+              },
+              {
                 "name": "delete:development"
               },
               {
@@ -1201,6 +1205,9 @@
               },
               {
                 "name": "ssh:production"
+              },
+              {
+                "name": "viewRoute:production"
               },
               {
                 "name": "delete:production"
@@ -2050,6 +2057,17 @@
             }
           },
           {
+            "name": "User can view Development Environment routes",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "resources": "[\"environment\"]",
+              "scopes": "[\"viewRoute:development\"]",
+              "applyPolicies": "[\"[Lagoon] User has access to project\",\"[Lagoon] Users role for project is Developer\"]"
+            }
+          },
+          {
             "name": "Run Drush uli on Production Environment",
             "type": "scope",
             "logic": "POSITIVE",
@@ -2420,6 +2438,17 @@
             "config": {
               "resources": "[\"environment\"]",
               "scopes": "[\"ssh:production\"]",
+              "applyPolicies": "[\"[Lagoon] User has access to project\",\"[Lagoon] Users role for project is Maintainer\"]"
+            }
+          },
+          {
+            "name": "User can view Production Environment routes",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "resources": "[\"environment\"]",
+              "scopes": "[\"viewRoute:production\"]",
               "applyPolicies": "[\"[Lagoon] User has access to project\",\"[Lagoon] Users role for project is Maintainer\"]"
             }
           },
@@ -3405,6 +3434,33 @@
         "phone",
         "offline_access",
         "microprofile-jwt"
+      ]
+    },
+    {
+      "clientId": "lagoon-oauth2proxy",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "protocolMappers": [
+        {
+          "name": "Lagoon User ID",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "lagoon-uid",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "lagoon.user_id",
+            "jsonType.label": "int",
+            "multivalued": ""
+          }
+        }
       ]
     },
     {

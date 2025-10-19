@@ -209,7 +209,8 @@ services :=	api \
 			keycloak-db \
 			logs2notifications \
 			webhook-handler \
-			webhooks2tasks
+			webhooks2tasks \
+			oauth2-proxy
 
 service-images += $(services)
 
@@ -233,6 +234,7 @@ build/api-sidecar-handler: services/api-sidecar-handler/Dockerfile
 build/keycloak-db: services/keycloak-db/$(DATABASE_DOCKERFILE)
 build/keycloak: services/keycloak/Dockerfile
 build/logs2notifications: services/logs2notifications/Dockerfile
+build/oauth2-proxy: services/oauth2-proxy/Dockerfile
 build/tests: tests/Dockerfile
 # Auth SSH needs the context of the root folder, so we have it individually
 build/ssh: services/ssh/Dockerfile
@@ -463,8 +465,8 @@ STERN_VERSION = v2.6.1
 CHART_TESTING_VERSION = v3.11.0
 K3D_IMAGE = docker.io/rancher/k3s:v1.31.1-k3s1
 TESTS = [nginx,api,features-kubernetes,bulk-deployment,features-kubernetes-2,features-variables,active-standby-kubernetes,tasks,drush,python,gitlab,github,bitbucket,services]
-CHARTS_TREEISH = main
-CHARTS_REPOSITORY = https://github.com/uselagoon/lagoon-charts.git
+CHARTS_TREEISH = o2p-no-sidecar
+CHARTS_REPOSITORY = https://github.com/jackwrfuller/lagoon-charts.git
 #CHARTS_REPOSITORY = ../lagoon-charts
 TASK_IMAGES = task-activestandby
 
@@ -745,7 +747,7 @@ go/test: local-dev/go
 		&& cd ../..; \
 	done
 
-K3D_SERVICES = api api-db api-redis auth-server backup-handler actions-handler broker api-sidecar-handler keycloak keycloak-db logs2notifications webhook-handler webhooks2tasks local-api-data-watcher-pusher local-git ssh tests $(TASK_IMAGES)
+K3D_SERVICES = oauth2-proxy api api-db api-redis auth-server backup-handler actions-handler broker api-sidecar-handler keycloak keycloak-db logs2notifications webhook-handler webhooks2tasks local-api-data-watcher-pusher local-git ssh tests $(TASK_IMAGES)
 K3D_TESTS = local-api-data-watcher-pusher local-git tests
 K3D_TOOLS = k3d helm kubectl jq stern
 
@@ -753,7 +755,7 @@ K3D_TOOLS = k3d helm kubectl jq stern
 .PHONY: k3d/test
 k3d/test: k3d/setup k3d/install-lagoon k3d/retest
 
-LOCAL_DEV_SERVICES = api auth-server actions-handler api-sidecar-handler logs2notifications webhook-handler webhooks2tasks
+LOCAL_DEV_SERVICES = oauth2-proxy api auth-server actions-handler api-sidecar-handler logs2notifications webhook-handler webhooks2tasks
 
 # install lagoon dependencies in a k3d cluster
 .PHONY: k3d/setup
@@ -833,6 +835,7 @@ endif
 		USE_CALICO_CNI=false \
 		LAGOON_SSH_PORTAL_LOADBALANCER=$(LAGOON_SSH_PORTAL_LOADBALANCER) \
 		LAGOON_FEATURE_FLAG_DEFAULT_ROOTLESS_WORKLOAD=enabled \
+		LAGOON_FEATURE_FLAG_OAUTH2PROXY_DOMAIN="http://lagoon-oauth2proxy.$$($(KUBECTL) -n ingress-nginx get services ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}').nip.io" \
 		$$([ $(LAGOON_SEED_USERNAME) ] && echo 'LAGOON_SEED_USERNAME=$(LAGOON_SEED_USERNAME)') \
 		$$([ $(LAGOON_SEED_PASSWORD) ] && echo 'LAGOON_SEED_PASSWORD=$(LAGOON_SEED_PASSWORD)') \
 		$$([ $(LAGOON_SEED_ORGANIZATION) ] && echo 'LAGOON_SEED_ORGANIZATION=$(LAGOON_SEED_ORGANIZATION)') \
@@ -937,6 +940,14 @@ k3d/push-local-build-image:
 		&& docker login -u admin -p Harbor12345 $$IMAGE_REGISTRY \
 		&& docker tag lagoon/build-deploy-image:local $$IMAGE_REGISTRY/build-deploy-image:$(BUILD_DEPLOY_IMAGE_TAG) \
 		&& docker push $$IMAGE_REGISTRY/build-deploy-image:$(BUILD_DEPLOY_IMAGE_TAG)
+
+.PHONY: k3d/push-local-o2p-image
+k3d/push-local-o2p-image:
+	@export KUBECONFIG="$$(pwd)/kubeconfig.k3d.$(CI_BUILD_TAG)" && \
+		export IMAGE_REGISTRY="registry.$$($(KUBECTL) -n ingress-nginx get services ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}').nip.io/library" \
+		&& docker login -u admin -p Harbor12345 $$IMAGE_REGISTRY \
+		&& docker tag quay.io/oauth2-proxy/oauth2-proxy:latest $$IMAGE_REGISTRY/oauth2-proxy:o2p-authentication \
+		&& docker push $$IMAGE_REGISTRY/oauth2-proxy:o2p-authentication
 
 # pull, retag, then push the stable version of the build image to the k3d cluster registry.
 .PHONY: k3d/push-stable-build-image

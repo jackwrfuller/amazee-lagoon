@@ -147,6 +147,12 @@ export const Sql = {
       .join('project', 'e.project', '=', 'project.id')
       .where(knex.raw('e.openshift_project_name = ?', openshiftProjectName))
       .toString(),
+  canViewEnvironmentRoute: (openshiftProjectName: string) =>
+    knex('environment AS e')
+      .select('e.*')
+      .join('project', 'e.project', '=', 'project.id')
+      .where(knex.raw('e.openshift_project_name = ?', openshiftProjectName))
+      .toString(),
   selectEnvironmentServiceById: (id: number) =>
     knex('environment_service')
       .where('id', '=', id)
